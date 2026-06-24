@@ -20,7 +20,7 @@ public class CatController : MonoBehaviour
 
     [Header("Gravity")]
     public float gravity = -25f;
-    public float groundedGravity = -2f;
+    public float groundedGravity = -0.1f;
 
     [Header("Jump Feel")]
     public float fallMultiplier = 2f;
@@ -35,7 +35,20 @@ public class CatController : MonoBehaviour
     private Vector3 velocity;
     private Vector3 moveVelocity;
 
-    private Vector3 smoothedMoveDirection;
+    private CatState currentState;
+
+    [SerializeField] private float climbCheckDistance = 1f;
+    [SerializeField] private LayerMask climbableLayer;
+    [SerializeField] private float climbSpeed = 4f;
+    [SerializeField] private float climbExitBoost = 5f;
+
+    [Header("Glide")]
+    [SerializeField] private float glideGravity = -2f;
+    [SerializeField] private float glideForwardBoost = 2f;
+    [SerializeField] private float glideFallSpeed = -6f;
+    private bool isGliding;
+
+    private UmbrellaSystem umbrellaSystem;
 
     private void Awake()
     {
@@ -52,12 +65,45 @@ public class CatController : MonoBehaviour
     {
         HandleCursor();
 
+        UpdateState();
+
         UpdateCoyoteTime();
         UpdateJumpBuffer();
 
-        Move();
-        HandleJump();
-        ApplyGravity();
+        HandleClimbInput();
+
+        switch (currentState)
+        {
+            case CatState.Climbing:
+                HandleClimbing();
+                break;
+
+            default:
+                Move();
+
+                HandleJump();
+
+                HandleGlide();
+
+                ApplyGravity();
+
+                Vector3 finalVelocity =
+                    moveVelocity +
+                    Vector3.up * velocity.y;
+
+                if (isGliding)
+                {
+                    finalVelocity +=
+                        transform.forward *
+                        glideForwardBoost;
+                }
+
+                controller.Move(
+                    finalVelocity *
+                    Time.deltaTime
+                );
+                break;
+        }
     }
 
     #region Cursor
@@ -163,7 +209,7 @@ public class CatController : MonoBehaviour
             );
         }
 
-        controller.Move(moveVelocity * Time.deltaTime);
+        //controller.Move(moveVelocity * Time.deltaTime);
     }
 
     #endregion
@@ -172,6 +218,11 @@ public class CatController : MonoBehaviour
 
     private void ApplyGravity()
     {
+        if (!controller.isGrounded)
+        {
+            Debug.Log(velocity.y);
+        }
+
         if (controller.isGrounded)
         {
             if (velocity.y < 0)
@@ -179,7 +230,20 @@ public class CatController : MonoBehaviour
         }
         else
         {
-            if (velocity.y < 0)
+            if (isGliding)
+            {
+
+                umbrellaSystem.OpenUmbrella();
+                umbrellaSystem.DrainForGlide();
+
+                velocity.y += gravity * 0.5f * Time.deltaTime;
+
+                velocity.y = Mathf.Max(
+                    velocity.y,
+                    glideFallSpeed
+                );
+            }
+            else if (velocity.y < 0)
             {
                 velocity.y += gravity * fallMultiplier * Time.deltaTime;
             }
@@ -189,11 +253,111 @@ public class CatController : MonoBehaviour
             }
             else
             {
+                umbrellaSystem.CloseUmbrella();
                 velocity.y += gravity * Time.deltaTime;
             }
         }
+        //controller.Move(velocity * Time.deltaTime);
+    }
 
-        controller.Move(velocity * Time.deltaTime);
+    #endregion
+
+
+
+    #region Climb
+
+    private void UpdateState()
+    {
+        if (currentState == CatState.Climbing)
+            return;
+
+        currentState =
+            controller.isGrounded
+            ? CatState.Grounded
+            : CatState.Airborne;
+    }
+
+    private bool CanClimb(out RaycastHit hit)
+    {
+        Vector3 origin =
+            transform.position + Vector3.up * 0.5f;
+
+        return Physics.Raycast(
+            origin,
+            transform.forward,
+            out hit,
+            climbCheckDistance,
+            climbableLayer
+        );
+    }
+
+    private void HandleClimbInput()
+    {
+        if (currentState == CatState.Climbing)
+            return;
+
+        if (!Input.GetKeyDown(KeyCode.E))
+            return;
+
+        if (CanClimb(out RaycastHit hit))
+        {
+            EnterClimb(hit);
+        }
+    }
+
+
+    private void EnterClimb(RaycastHit hit)
+    {
+        currentState = CatState.Climbing;
+
+        velocity = Vector3.zero;
+        moveVelocity = Vector3.zero;
+
+        transform.forward = -hit.normal;
+    }
+
+    private void HandleClimbing()
+    {
+        if (!CanClimb(out RaycastHit hit))
+        {
+            ExitClimb();
+            return;
+        }
+
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        Vector3 climbMove = Vector3.up * vertical;
+
+        controller.Move(
+            climbMove *
+            climbSpeed *
+            Time.deltaTime
+        );
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            ExitClimb();
+        }
+    }
+
+    private void ExitClimb()
+    {
+        currentState = CatState.Airborne;
+
+        moveVelocity = Vector3.zero;
+
+        velocity.y = climbExitBoost;
+    }
+    #endregion
+
+    #region Glide
+
+    private void HandleGlide()
+    {
+        isGliding =
+            !controller.isGrounded &&
+            velocity.y < 0f &&
+            Input.GetButton("Jump");
     }
 
     #endregion
@@ -205,5 +369,16 @@ public class CatController : MonoBehaviour
             transform.position,
             transform.forward * 2f
         );
+
+        Gizmos.color = Color.green;
+
+        Vector3 origin =
+            transform.position + Vector3.up * 0.5f;
+
+        Gizmos.DrawRay(
+            origin,
+            transform.forward * climbCheckDistance
+        );
     }
+
 }
