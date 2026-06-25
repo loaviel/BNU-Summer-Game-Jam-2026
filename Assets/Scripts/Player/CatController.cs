@@ -54,6 +54,9 @@ public class CatController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         cam = Camera.main;
+
+
+        umbrellaSystem = GetComponent<UmbrellaSystem>();
     }
 
     private void Start()
@@ -253,7 +256,6 @@ public class CatController : MonoBehaviour
             }
             else
             {
-                umbrellaSystem.CloseUmbrella();
                 velocity.y += gravity * Time.deltaTime;
             }
         }
@@ -351,13 +353,18 @@ public class CatController : MonoBehaviour
     #endregion
 
     #region Glide
-
     private void HandleGlide()
     {
         isGliding =
-            !controller.isGrounded &&
-            velocity.y < 0f &&
-            Input.GetButton("Jump");
+    !controller.isGrounded &&
+    velocity.y < 0f &&
+    Input.GetButton("Jump") &&
+    umbrellaSystem.currentCharge > 0f;
+
+        if (isGliding)
+            umbrellaSystem.OpenUmbrella();
+        else
+            umbrellaSystem.CloseUmbrella();
     }
 
     #endregion

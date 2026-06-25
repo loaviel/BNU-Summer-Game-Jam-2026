@@ -7,7 +7,17 @@ public class RainDetector : MonoBehaviour
     [SerializeField] private float checkHeight = 20f;
     [SerializeField] private LayerMask coverLayer;
 
+    [SerializeField] private float rechargeDelay = 1f;
+
+    private float coverTimer;
+
     private UmbrellaSystem umbrellaSystem;
+
+    private void Awake()
+    {
+        umbrellaSystem = GetComponent<UmbrellaSystem>();
+    }
+
     private void Update()
     {
         IsCovered = Physics.Raycast(
@@ -19,7 +29,16 @@ public class RainDetector : MonoBehaviour
 
         if (IsCovered)
         {
-            umbrellaSystem.Recharge();
+            coverTimer += Time.deltaTime;
+
+            if (coverTimer >= rechargeDelay)
+            {
+                umbrellaSystem.Recharge();
+            }
+        }
+        else
+        {
+            coverTimer = 0f;
         }
     }
 

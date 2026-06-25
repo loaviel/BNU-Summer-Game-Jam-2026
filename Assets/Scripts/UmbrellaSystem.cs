@@ -12,6 +12,13 @@ public class UmbrellaSystem : MonoBehaviour
 
     public bool IsOpen { get; private set; }
 
+    private void OnGUI()
+    {
+        GUI.Label(
+            new Rect(20, 20, 300, 50),
+            $"Umbrella: {currentCharge:F0}"
+        );
+    }
     public void OpenUmbrella()
     {
         if (currentCharge <= 0)
