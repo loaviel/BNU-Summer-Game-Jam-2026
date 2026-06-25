@@ -2823,6 +2823,8 @@ GameObject:
   - component: {fileID: 1588371306}
   - component: {fileID: 1588371312}
   - component: {fileID: 1588371313}
+  - component: {fileID: 1588371314}
+  - component: {fileID: 1588371315}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -3013,6 +3015,35 @@ MonoBehaviour:
   glideDrainRate: 15
   rainDrainRate: 10
   rechargeRate: 20
+--- !u!114 &1588371314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588371304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3de22440ce3a9949bc1ce9e4ce950cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxWetness: 100
+  currentWetness: 0
+  wetRate: 15
+  dryRate: 10
+--- !u!114 &1588371315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588371304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc879a69dd86aee4b96b8f170dc57258, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsRaining: 1
 --- !u!1 &1628429527
 GameObject:
   m_ObjectHideFlags: 0

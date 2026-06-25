@@ -14,9 +14,13 @@ public class UmbrellaSystem : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Label(
-            new Rect(20, 20, 300, 50),
-            $"Umbrella: {currentCharge:F0}"
+        GUIStyle style = new GUIStyle(GUI.skin.box);
+
+        style.fontSize = 24;
+
+        GUI.Box(
+            new Rect(20, 20, 400, 40),
+            $"Umbrella: {Mathf.RoundToInt(currentCharge)}"
         );
     }
     public void OpenUmbrella()

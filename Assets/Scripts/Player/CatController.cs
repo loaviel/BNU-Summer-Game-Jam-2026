@@ -49,6 +49,7 @@ public class CatController : MonoBehaviour
     private bool isGliding;
 
     private UmbrellaSystem umbrellaSystem;
+    private CatWetness wetness;
 
     private void Awake()
     {
@@ -57,6 +58,8 @@ public class CatController : MonoBehaviour
 
 
         umbrellaSystem = GetComponent<UmbrellaSystem>();
+
+        wetness = GetComponent<CatWetness>();
     }
 
     private void Start()
@@ -155,21 +158,51 @@ public class CatController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (jumpBufferTimer > 0 && coyoteTimer > 0)
+        if (jumpBufferTimer <= 0 || coyoteTimer <= 0)
+            return;
+
+        float jumpMultiplier = 1f;
+
+        switch (wetness.CurrentState)
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            case WetnessState.Damp:
+                jumpMultiplier = 0.9f;
+                break;
 
-            jumpBufferTimer = 0f;
-            coyoteTimer = 0f;
+            case WetnessState.Wet:
+                jumpMultiplier = 0.7f;
+                break;
         }
-    }
 
+        velocity.y = Mathf.Sqrt(
+            jumpHeight *
+            jumpMultiplier *
+            -2f *
+            gravity
+        );
+
+        jumpBufferTimer = 0f;
+        coyoteTimer = 0f;
+    }
     #endregion
 
     #region Movement
 
     private void Move()
     {
+        float speedMultiplier = 1f;
+
+        switch (wetness.CurrentState)
+        {
+            case WetnessState.Damp:
+                speedMultiplier = 0.85f;
+                break;
+
+            case WetnessState.Wet:
+                speedMultiplier = 0.65f;
+                break;
+        }
+
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
@@ -199,7 +232,9 @@ public class CatController : MonoBehaviour
 
             moveVelocity = Vector3.MoveTowards(
                 moveVelocity,
-                moveDirection * moveSpeed,
+                moveDirection *
+                moveSpeed *
+                speedMultiplier,
                 acceleration * Time.deltaTime
             );
         }
@@ -211,8 +246,6 @@ public class CatController : MonoBehaviour
                 acceleration * Time.deltaTime
             );
         }
-
-        //controller.Move(moveVelocity * Time.deltaTime);
     }
 
     #endregion
@@ -223,7 +256,7 @@ public class CatController : MonoBehaviour
     {
         if (!controller.isGrounded)
         {
-            Debug.Log(velocity.y);
+            //Debug.Log(velocity.y);
         }
 
         if (controller.isGrounded)
@@ -345,7 +378,7 @@ public class CatController : MonoBehaviour
     private void ExitClimb()
     {
         currentState = CatState.Airborne;
-
+    
         moveVelocity = Vector3.zero;
 
         velocity.y = climbExitBoost;

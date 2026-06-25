@@ -12,10 +12,18 @@ public class RainDetector : MonoBehaviour
     private float coverTimer;
 
     private UmbrellaSystem umbrellaSystem;
+    private CatWetness wetness;
+    private RainManager rainManager;
 
     private void Awake()
     {
-        umbrellaSystem = GetComponent<UmbrellaSystem>();
+        umbrellaSystem =
+            GetComponent<UmbrellaSystem>();
+
+        wetness =
+            GetComponent<CatWetness>();
+
+        rainManager = FindFirstObjectByType<RainManager>();
     }
 
     private void Update()
@@ -27,18 +35,23 @@ public class RainDetector : MonoBehaviour
             coverLayer
         );
 
+        Debug.Log($"Covered: {IsCovered} | Umbrella: {umbrellaSystem.IsOpen}");
+
         if (IsCovered)
         {
-            coverTimer += Time.deltaTime;
-
-            if (coverTimer >= rechargeDelay)
-            {
-                umbrellaSystem.Recharge();
-            }
+            umbrellaSystem.Recharge();
+            wetness.DryOff();
         }
         else
         {
-            coverTimer = 0f;
+            if (umbrellaSystem.currentCharge > 0)
+            {
+                umbrellaSystem.DrainForRain();
+            }
+            else
+            {
+                wetness.AddWetness();
+            }
         }
     }
 
