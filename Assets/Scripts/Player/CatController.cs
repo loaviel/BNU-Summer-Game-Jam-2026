@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class CatController : MonoBehaviour
@@ -65,7 +66,10 @@ public class CatController : MonoBehaviour
 
     private void Start()
     {
-        LockCursor();
+        if (SceneManager.GetActiveScene().name != "MainMenu")
+        {
+            LockCursor();
+        }
     }
 
     private void Update()

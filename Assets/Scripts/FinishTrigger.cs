@@ -10,14 +10,10 @@ public class FinishTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (finished)
-            return;
-
-        if (!other.CompareTag("Player"))
-            return;
+        if (finished) return;
+        if (!other.CompareTag("Player")) return;
 
         finished = true;
-
         StartCoroutine(FinishGame());
     }
 
@@ -25,12 +21,20 @@ public class FinishTrigger : MonoBehaviour
     {
         Time.timeScale = 0f;
 
-        // TODO:
-        // Play meow
-        // Play curl-up animation
-        // Fade screen
+        fadeCanvas.gameObject.SetActive(true);
+        fadeCanvas.alpha = 0f;
+        fadeCanvas.blocksRaycasts = true;
 
-        yield return null;
+        float t = 0f;
+
+        while (t < fadeTime)
+        {
+            t += Time.unscaledDeltaTime;
+            fadeCanvas.alpha = Mathf.Clamp01(t / fadeTime);
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(0.2f);
 
         SceneManager.LoadScene("MainMenu");
     }
