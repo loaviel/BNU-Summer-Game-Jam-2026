@@ -35,7 +35,7 @@ public class RainDetector : MonoBehaviour
             coverLayer
         );
 
-        Debug.Log($"Covered: {IsCovered} | Umbrella: {umbrellaSystem.IsOpen}");
+        //Debug.Log($"Covered: {IsCovered} | Umbrella: {umbrellaSystem.IsOpen}");
 
         if (IsCovered)
         {

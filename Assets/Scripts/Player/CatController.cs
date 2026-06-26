@@ -50,7 +50,7 @@ public class CatController : MonoBehaviour
 
     private UmbrellaSystem umbrellaSystem;
     private CatWetness wetness;
-
+    private CatAnimator catAnimator;
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -60,6 +60,7 @@ public class CatController : MonoBehaviour
         umbrellaSystem = GetComponent<UmbrellaSystem>();
 
         wetness = GetComponent<CatWetness>();
+        catAnimator = GetComponentInChildren<CatAnimator>();
     }
 
     private void Start()
@@ -180,6 +181,8 @@ public class CatController : MonoBehaviour
             -2f *
             gravity
         );
+
+        catAnimator.PlayJump();
 
         jumpBufferTimer = 0f;
         coyoteTimer = 0f;
@@ -401,6 +404,7 @@ public class CatController : MonoBehaviour
     }
 
     #endregion
+    public bool IsGliding => isGliding;
 
     private void OnDrawGizmos()
     {
