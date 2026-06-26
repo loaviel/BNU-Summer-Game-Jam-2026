@@ -117,6 +117,9 @@ public class CatController : MonoBehaviour
 
     private void HandleCursor()
     {
+        if (PauseMenu.IsPaused)
+            return;
+
         if (Input.GetKeyDown(KeyCode.Escape))
             UnlockCursor();
 

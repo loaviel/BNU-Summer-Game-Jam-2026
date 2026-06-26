@@ -6,7 +6,7 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] GameObject panel;
 
     bool paused;
-
+    public static bool IsPaused;
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -20,6 +20,7 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
+        IsPaused = false;
         paused = false;
         panel.SetActive(false);
 
@@ -31,6 +32,7 @@ public class PauseMenu : MonoBehaviour
 
     void Pause()
     {
+        IsPaused = true;
         paused = true;
         panel.SetActive(true);
 
